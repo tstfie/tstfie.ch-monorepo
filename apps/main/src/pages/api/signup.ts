@@ -1,6 +1,8 @@
 export const prerender = false;
 import type { APIRoute } from "astro";
 
+console.log("ENV CHECK:", !!process.env.BREVO_API_KEY);
+
 /* ================================
    Helpers
 ================================= */
