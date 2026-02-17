@@ -1,0 +1,96 @@
+.title { font-weight: 400; }
+
+.meta {
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.meta.number {
+  font-family: IBM Plex Mono, sans-serif;
+}
+
+.paragraph {
+  margin-bottom: 0;
+  font-size: 24px;
+  line-height: 24px;
+}
+
+.h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.h3 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 28px;
+}
+
+.h3:active { color: #262626; }
+
+.h4 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.h5 {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.asterisk {
+  color: #262626a8;
+  cursor: help;
+}
+
+.asterisk.gold {
+  color: #da0;
+}
+
+@media screen and (max-width: 991px) {
+  .asterisk {
+    color: #262626ad;
+  }
+
+  .body-text {
+    column-gap: 12px;
+    row-gap: 12px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .paragraph {
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  .meta {
+    font-size:14px;
+  }
+
+  .h2 {
+    font-size: 28px;
+    line-height: 28px;
+  }
+
+  .h3 {
+    font-size: 24px;
+    line-height: 24px;
+  }
+
+  .h4 {
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  .h5 {
+    font-size: 16px;
+    line-height: 16px;
+  }
+}

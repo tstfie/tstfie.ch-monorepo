@@ -1,0 +1,135 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/forms.css"
+import "@styles/utilities.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import Header from '../layouts/header.astro';
+import Head from '../layouts/head.astro';
+import Footer from '../layouts/footer.astro';
+---
+
+<html lang="en">
+<Head
+    title="tstfie | Contact"
+    description="Contact, tstfie."
+    canonical="https://www.tstfie.ch/contact"
+/>
+<body>
+  <container class="padding">
+    <Header>
+      <div class="projects-nav">
+        <a href="/?projects=open" class="navigation view-projects">View projects</a>
+        </div>
+      <a href="/" onclick="(e => { e.preventDefault(); history.back(); })(event)" class="navigation">Back</a>
+    </Header>
+    <section class="window contact">
+        <h1>Contact</h1>
+        <p>Niklay Wiborny, for tstfie</p>
+      <section class="contact-section">
+        <h3><a href="mailto:info@tstfie.ch">info@tstfie.ch</a></h3>
+        <div class="form-block">
+          <form id="contactForm" class="fields-wrapper">
+            <!-- Honeypot field (hidden from users) -->
+            <input type="text" name="website" style="display:none">
+
+            <div class="div-block">
+              <div>
+                <label for="first-name"><h5>First Name<span class="asterisk">*</span></h5></label>
+                <input class="input-field" maxlength="256" name="name" type="text" id="first-name" required>
+              </div>
+              <div>
+                <label for="last-name"><h5>Last Name</h5></label>
+                <input class="input-field" maxlength="256" name="lastName" id="last-name" type="text">
+              </div>
+            </div>
+
+            <div>
+              <label for="email"><h5>Email Address<span class="asterisk">*</span></h5></label>
+              <input class="input-field email" maxlength="256" name="email" type="email" id="email" required>
+            </div>
+
+            <div>
+              <label for="message"><h5>Message<span class="asterisk">*</span></h5></label>
+              <textarea class="input-field plain" id="message" name="message" required></textarea>
+            </div>
+
+            <div class="interaction-wrapper">
+              <button type="submit" class="cta primary"><h4>Submit</h4></button>
+            </div>
+
+            <!-- Inline messages -->
+            <p id="formMessage" style="display:none;"></p>
+          </form>
+        </div>
+      </section>
+      <section class="contact-section">
+        <h3><a href="#">socials</a></h3>
+        <div class="fields-wrapper socials">
+          <h5>
+            <a href="https://www.instagram.com/tstfie" class="link">instagram.com</a>
+          </h5>
+          <h5>
+            <a href="https://www.twitter.com/phrygianchord" class="link">x.com</a>
+          </h5>
+          <h5>
+            <a href="https://www.youtube.com/@tstfie-music" class="link">youtube.com</a>
+          </h5>
+        </div>
+      </section>
+    </section>
+    <Footer/>
+  </container>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('contactForm') as HTMLFormElement | null;
+      const messageEl = document.getElementById('formMessage') as HTMLParagraphElement | null;
+      const button = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+
+      if (!form || !messageEl || !button) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageEl.style.display = 'none';
+        button.disabled = true;
+
+        const formData = Object.fromEntries(new FormData(form));
+
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+
+          const result = await res.json();
+
+          if (result.success) {
+            messageEl.textContent = 'Message sent.';
+            messageEl.style.color = '#262626';
+            messageEl.style.display = 'block';
+            form.reset();
+          } else {
+            messageEl.textContent = 'Error: ' + result.error;
+            messageEl.style.color = 'red';
+            messageEl.style.display = 'block';
+          }
+        } catch (err) {
+          messageEl.textContent = 'Error sending message. Please try again.';
+          messageEl.style.color = '#262626';
+          messageEl.style.display = 'block';
+        }
+
+        button.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>

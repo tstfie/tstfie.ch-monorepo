@@ -1,0 +1,42 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import Header from '../layouts/header.astro';
+import Head from '../layouts/head.astro';
+import Footer from '../layouts/footer.astro';
+---
+
+<html lang="en">
+<Head
+    title="tstfie | About"
+    description="About tstfie."
+    canonical="https://www.tstfie.ch/about"
+/>
+<body>
+  <container class="padding">
+	{/*// Header //*/}
+    <Header>
+      <div class="projects-nav">
+        <a href="/?projects=open" class="navigation view-projects">View projects</a>
+        </div>
+      <a href="/" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+    </Header>
+
+	{/*// Main content //*/}
+    <section class="window contact">
+        <h1>Information</h1>
+        <p>Niklay Wiborny, for tstfie. Creating music and conceptual design projects. The work approaches the structure of design itself as an opportunity to convey. Sneaker mock-ups, for example, are used not as blueprints for manufacturing, but solely as narrative-driven art projects built around curated themes.<br/><br/>Emerging publicly in 2024, the first design cycle moved through twelve sneaker collections exploring the work's fundamentals. SAINT PABLO, the 23/24 cycle’s conclusive sneaker collection, explored self-convicted ambition taken to an extreme. An external reading of the collection described it as “impressive in its intensity and complexity, achieving an extraordinary level of professionalism by allowing the shoe to tell and convey a story.”
+Its follow-up, T.W.I.Y Waves, arrived two months later. The minimally promoted July release leaned into a geometric, digital context. Beginning with Waves as its only full-length collection, the 24-25 cycle stayed minimal, inviting simultaneous projects. Both presented paths saw further disruption, culminating in 2025's Periapsis: a 34-design, concept-heavy release navigating depersonalisation, orbit, distance, guilt, and discovery as a response to a prior creative period. Periapsis defined a new approach as primarily a set of theses arranged en-passant to form a story.<br/><br/>In parallel stands music. Early demos and mixtapes such as Interludes (2024) established an introductory sound. INTERLUDIUMAR, presented in September 2024, gathered the motifs in a ten-track instrumental debut, initiating a series of classmate-collaborations on the way. A dense collaborative phase followed, resolving with the 10-track SAINTIFICATION and What’s That, Poetry by the end of the year.<br/><br/>Silence structured the output of the following year: a bi-monthly, low-promo release schedule framed the work of 2025. Circle of Fifths presented a progressively unfolding, repetition-focused release in April. SPIRITS followed in August as a presentation of theater, faith, and chaos, later revisited in an expansive Legacy release. These themes resolved in Homes, a 6-track meta-EP shaped by the output of the previous four major projects, emerging as a conclusive statement. Homes followed up on the themes presented in SPIRITS through a narrative of chaos to acceptance.<br/><br/>Across mediums, consistency is preserved almost exclusively through similar fundamental tensions: the pull between ambition and surrender, silence and shame and ascent and return. The work documents difficulties of self-depiction in an oscillation between clarity and impulsiveness.</p>    </section>
+	{/*// Footer component //*/}
+	<Footer/>
+  </container>
+</body>
+</html>

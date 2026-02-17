@@ -1,0 +1,50 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+import { sanityClient } from "sanity:client";
+
+import Head from '../layouts/head.astro';
+
+const latestProject = await sanityClient.fetch(`
+  *[_type == "work"] | order(releaseDate desc)[0]{
+  type,
+  title,
+  "slug": slug.current
+  }
+`);
+
+const urlPrefix = latestProject.type === "Collection" ? "/designs/25-26/" : "/music/";
+const latestUrl = `${urlPrefix}${latestProject.slug}`;
+---
+<html lang="en">
+<Head
+  title="tstfie | Not Found",
+  description="The requested page could not be found.",
+  canonical="https://www.tstfie.ch/404"
+/>
+<body style="overflow:hidden;">
+  <div class="padding">
+    <div class="centered-element-wrap">
+        <main style="margin-top:-180px;">
+          <section>
+            <h1>404</h1>
+          </section>
+          <section>
+            <p>Nothing has been placed at this location.<br><span class="asterisk">Review the URL or retrace starting from index.</span></p>
+            <div class="interaction-wrapper">
+              <p><a href={latestUrl} class="link">Latest project</a></p>
+              <p><a href="/" class="link">Home</a></p>
+            </div>
+          </section>
+        </main>
+    </div>
+  </div>
+</body>
+</html>

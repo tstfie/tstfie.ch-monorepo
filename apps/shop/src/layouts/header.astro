@@ -1,0 +1,59 @@
+---
+---
+ <section class="hero">
+  <nav class="nav">
+    <slot/>
+  </nav>
+
+  <div class="website-name">
+    <a class="navigation">tstfie</a>
+    <div class="secondary-nav">
+      <div class="interaction-wrapper">
+        <div class="large-breakpoint-only">|</div>
+        <a href="/about" class="navigation">about</a>
+        <a href="/signup" class="navigation">sign up</a>
+        <a href="/contact" class="navigation">contact</a>
+        <a href="/music" class="navigation">music</a>
+      </div>
+    </div>
+  </div>
+ </section>
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const websiteName = document.querySelector('.website-name');
+    const secondaryNav = document.querySelector('.secondary-nav');
+    const navs = document.querySelectorAll('.nav');
+
+    let closeTimer;
+    const DELAY = 300; // ms
+
+    const open = () => {
+      clearTimeout(closeTimer);
+
+      secondaryNav.classList.add('is-open');
+      navs.forEach(n => (n.style.display = 'none'));
+    };
+
+    const close = () => {
+      clearTimeout(closeTimer);
+
+      closeTimer = setTimeout(() => {
+        secondaryNav.classList.remove('is-open');
+        navs.forEach(n => (n.style.display = ''));
+      }, DELAY);
+    };
+
+    websiteName.addEventListener('mouseenter', open);
+    websiteName.addEventListener('mouseleave', close);
+
+    // Mobile click
+    websiteName.addEventListener('click', (e) => {
+      e.stopPropagation();
+      secondaryNav.classList.contains('is-open') ? close() : open();
+    });
+
+    // Click outside closes (same delay)
+    document.addEventListener('click', close);
+  });
+</script>
+<script src="/scripts/global.js" defer></script>

@@ -1,0 +1,127 @@
+---
+import "@styles/components.css"
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const snippets = await sanityClient.fetch(`
+    *[_type == "snippet"]{ "slug": slug.current }
+  `);
+
+  return snippets.map((s: { slug: any; }) => ({
+    params: { slug: s.slug },
+    props: {},
+  }));
+}
+
+// import Sanity client
+import { sanityClient } from '../../../lib/sanity';
+
+// Get the slug from the route
+const { slug } = Astro.params;
+
+// Fetch the snippet by slug
+const snippet = await sanityClient.fetch(`
+  *[_type == "snippet" && slug.current == $slug][0]{
+    title,
+    "audioUrl": audioFile.asset->url,
+    link
+  }
+`, { slug });
+
+if (!snippet) {
+  throw new Error(`Snippet not found for slug: ${slug}`);
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>{snippet.title}</title>
+<style>
+  :root{--bg:#000000;--fg:#ffffff}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"Arial",sans-serif,sans-serif;display:flex;align-items:center;justify-content:center}
+  .wrap{text-align:center;padding:1.5rem}
+  h1{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;font-size:1.1rem;margin:0 0 0.8rem}
+  audio{display:none}
+  /* tiny circular play button that only appears if needed */
+  #playBtn{
+    display:none;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:0;
+    background:var(--fg);
+    color:var(--bg);
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+  }
+  #hint{font-size:0.85rem;opacity:0.9;margin-top:0.6rem}
+  #note{font-size:0.85rem;margin-top:1rem;display:none;text-align:center}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <audio id="player" preload="auto" playsinline>
+      <source src={snippet.audioUrl} type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <button id="playBtn" aria-label="Play snippet">▶</button>
+    <div id="hint" aria-live="polite"></div>
+    <div id="note">thank you. for more info, visit <a href={`https://www.${snippet.link}`} style="color:#fff;">{snippet.link}</a></div>
+  </div>
+
+<script is:inline>
+(function(){
+  const audio = document.getElementById('player');
+  const btn = document.getElementById('playBtn');
+  const hint = document.getElementById('hint');
+  const note = document.getElementById('note');
+
+  function showPlayButton(message){
+    btn.style.display = 'inline-flex';
+    hint.textContent = message || 'TAP TO START.';
+    btn.focus();
+  }
+
+  function tryPlay(){
+    // attempt playback
+    audio.play().then(() => {
+      // success
+      btn.style.display = 'none';
+      hint.textContent = '';
+    }).catch((err) => {
+      // autoplay blocked or some other error
+      showPlayButton('AUTOPLAY BLOCKED. TAP TO START.');
+      btn.addEventListener('click', () => {
+        audio.play().then(() => {
+          btn.style.display = 'none';
+          hint.textContent = '';
+        }).catch(() => {
+          hint.textContent = 'PLAYBACK FAILED. RELOAD.';
+        });
+      }, { once: true });
+    });
+  }
+
+  // Show note after snippet ends
+  audio.addEventListener('ended', () => {
+    note.style.display = 'block';
+  });
+
+  // Try on load, and also when page becomes visible (some browsers behave oddly)
+  document.addEventListener('DOMContentLoaded', tryPlay);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tryPlay();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "@tstfie/styles",
+  "version": "1.0.0",
+  "main": "base.css",
+  "files": [
+    "**/*.css"
+  ]
+}

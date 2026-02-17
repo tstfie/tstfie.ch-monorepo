@@ -1,0 +1,38 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import Head from '../layouts/head.astro';
+import Header from '../layouts/header.astro';
+import Footer from '../layouts/footer.astro'
+---
+
+<html lang ="en">
+<Head
+    title="tstfie"
+    description="Privacy policy for tstfie.ch"
+    canonical="https://www.tstfie.ch/privacy"
+/>
+<body>
+  <container class="padding">
+    <Header>
+      <div class="projects-nav">
+        <a href="/?projects=open" class="navigation view-projects">View projects</a>
+        </div>
+      <a href="/" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+    </Header>
+    <section class="window contact">
+        <h1>Privacy Policy</h1>
+        <p>This website service collects only the information necessary to provide essential features of a mailing list.<br>‍<br><span class="h3">Information collected</span><br>When signing up, the following information is required:<br>-First name<br>-Email address<br>Optionally, subscribers can enter:<br>-Last name<br><br><span class="h3">How this information is used</span><br>Name and email address are used only to send intentional, infrequent updates about releases or announcements related to this ongoing project. Information is never sold, rented or otherwise provided to any third party for any reason other than assisting in communicating with the subscriber.<br><br><span class="h3">Data storage and security</span><br>Information is stored securely with standard digital safeguards. GDPR compliance is assured and reasonable measures are taken to prevent unauthorised access, misuse, or loss of data.<br><br><span class="h3">Third parties</span><br>Data is sent to and processed solely by an email service provider for the purpose of sending emails. No other third parties have access to this information.<br><br><span class="h3">Your rights</span><br>Subscribers have the right to:<br>-Access the information stored<br>-Request correction or deletion of information<br>-Unsubscribe at any time<br><br><span class="h3">Data retention</span><br>Information is retained only while the user remains subscribed. All data connected to the user is removed upon cancellation of the subscription.<br><br><span class="h3">Contact</span><br>Questions or requests regarding your data can be directed to <a href="/contact">www.tstfie.ch/contact</a>.<br><br>This policy is subject to update if operational changes occur. The most current version will always render on this page.</p>
+    </section>
+    <Footer/>
+  </contaner>
+</body>
+</html>

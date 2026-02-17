@@ -1,0 +1,51 @@
+---
+export const prerender = true;
+
+import { sanityClient } from "sanity:client";
+
+const d = new Date();
+let year = d.getFullYear();
+
+const latestProject = await sanityClient.fetch(`
+  *[_type == "work"] | order(releaseDate desc)[0]{
+  type,
+  title,
+  "slug": slug.current
+  }
+`);
+
+const urlPrefix = latestProject.type === "Collection" ? "/designs/25-26/" : "/music/";
+const latestUrl = `${urlPrefix}${latestProject.slug}`;
+import  SpeedInsights  from "@vercel/speed-insights/astro"
+import Analytics from '@vercel/analytics/astro'
+---
+
+<footer class="footer">
+  <section class="footer-section">
+    <div class="interaction-wrapper h5">
+      <a href="/music" class="cta">Music</a>
+      <a href="/contact" class="cta">Contact</a>
+      <a href="/about" class="cta">About</a>
+      <a href="/" class="cta">Home</a>
+    </div>
+  </section>
+  <section class="footer-section">
+    <div class="interaction-wrapper h5">
+      <a href="/signup" class="cta primary gold">Sign up</a>
+      <a href={latestUrl} class="cta primary">Latest project</a>
+    </div>
+  </section>
+  <section class="footer-section">
+    <div class="interaction-wrapper h5">
+      <div class="meta">© {year} Niklay Wiborny, tstfie</div>
+    </div>
+  </section>
+  <section class="footer-section">
+    <div class="interaction-wrapper h5">
+      <a class ="meta" href="/privacy" class="link">Privacy policy</a>
+      <a class="meta" href="/music/snippets" class="link">Snippets</a>
+    </div>
+  </section>
+  <SpeedInsights/>
+  <Analytics/>
+</footer>

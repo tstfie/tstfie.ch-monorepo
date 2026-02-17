@@ -1,0 +1,59 @@
+.audit-log {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.audit-log a {
+  text-decoration: none;
+}
+
+.audit-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.log-entry-content {
+  row-gap: 16px;
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  max-width: none;
+  margin-top: 4px;
+  margin-left: 0;
+  font-size: 24px;
+  line-height: 1.5px;
+  transition: max-height 0.4s ease, opacity 0.2s ease;
+  display: none;
+}
+
+.project-cover.audit {
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+}
+
+.log-entry-preview {
+  gap: 24px;
+  flex-flow: row;
+  justify-content: flex-start;
+  align-items: baseline;
+  font-size: 28px;
+  line-height: 28px;
+  display: flex;
+}
+
+.audit-log-entry[data-open="true"] .log-entry-content {
+  display: flex;
+}
+
+@media screen and (max-width: 991px) {
+  .log-entry-preview {
+    column-gap: 4px;
+    row-gap: 4px;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+}

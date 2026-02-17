@@ -1,0 +1,45 @@
+---
+export const prerender = true;
+
+import Head from '../../layouts/head.astro';
+import Header from '../../layouts/header.astro';
+import Footer from '../../layouts/footer.astro';
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/normalise.css"
+import "@styles/forms.css"
+import "@styles/responsive.css"
+import "@styles/utilities.css"
+---
+<html lang="en">
+
+<Head
+  title="tstfie | Sign up"
+   description="Sign up for the newsletter."
+   canonical="https://www.tstfie.ch/signup"
+/>
+<body>
+  <container class="padding">
+    <Header>
+      <a href="/?projects=open" class="navigation view-projects">View projects</a>
+      <a href="../" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+    </Header>
+    <section class="window contact">
+        <h1>Sign up</h1>
+        <p>Receive updates</p>
+      <section class="contact-section">
+        <h3>Successfully signed up.</h3>
+        <p>You are now signed up.</p>
+        <a href="/" class="cta primary"><h4>Home</h4></a>
+      </section>
+    <div>
+    </div>
+    </section>
+    <Footer/>
+  </container>
+</body>
+</html>

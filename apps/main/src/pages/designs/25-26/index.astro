@@ -1,0 +1,83 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import Header from '../../../layouts/header.astro';
+import Head from '../../../layouts/head.astro';
+import Footer from '../../../layouts/footer.astro';
+
+import { sanityClient } from "../../../lib/sanity";
+
+
+const collections = await sanityClient.fetch(`
+  *[_type == "work" && type == "Collection" && releaseDate >= "2025-06-01" && releaseDate <= "2026-05-31"]
+  | order(releaseDate desc) {
+    title,
+    releaseDate,
+    slug,
+    lengthDisplay
+  }
+`);
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "long" });
+  const year = date.getFullYear();
+
+  // get ordinal
+  let ordinal = "th";
+  if (day % 10 === 1 && day !== 11) ordinal = "st";
+  else if (day % 10 === 2 && day !== 12) ordinal = "nd";
+  else if (day % 10 === 3 && day !== 13) ordinal = "rd";
+
+return `${month} ${day}${ordinal}, ${year}`;
+}
+---
+<html lang ="en">
+<Head
+  title="tstfie | 25-26"
+  description="Collections by Niklay"
+  canonical="https://www.tstfie.ch/designs/25-26"
+/>
+<body>
+  <container class="padding">
+    <Header>
+        <a href="/" class="navigation">Home</a>
+        <a href="./" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+    </Header>
+    <section class="window">
+      <h1>25-26</h1>
+      <p>Beginning with Periapsis, the 25-26 cycle was established during the release-cycle of its first project. Both coincided with a structural shift of the website, following the "Apogee" period in May and June 2025.</p>
+      <div class="tracklist">
+        <div class="audit-log">
+            {collections.map((collection: {
+lengthDisplay: unknown; slug: { current: any; }; title: unknown; releaseDate: string; length: unknown; 
+}) => (
+                <div class="audit-log-entry">
+                    <div class="log-entry-preview">
+                        <div>
+                            <a href={`/designs/25-26/${collection.slug.current}/`}><h2>{collection.title}</h2></a>
+                        </div>
+                    </div>
+                    <div class="log-entry-content">
+                        <div class="meta number">
+                            {formatDate(collection.releaseDate)} · {collection.lengthDisplay}
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+      </div>
+    </section>
+    <Footer/>
+  </container>
+</body>
+</html>

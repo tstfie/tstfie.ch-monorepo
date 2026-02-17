@@ -1,0 +1,361 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/music.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import { sanityClient } from "../../lib/sanity";
+import { urlForImage } from "../../lib/url-for-image";
+
+import Header from '../../layouts/header.astro';
+import Head from '../../layouts/head.astro';
+import Footer from '../../layouts/footer.astro'
+import type { Slug } from "sanity";
+
+// ------------------------------
+// 1️⃣ Static paths
+// ------------------------------
+export async function getStaticPaths() {
+  const slugs: { slug: string }[] = await sanityClient.fetch(`
+    *[_type == "work" && type != "Collection"]{
+      "slug": slug.current
+    }
+  `);
+
+  return slugs.map(({ slug }) => ({
+    params: { slug },
+  }));
+}
+
+// ------------------------------
+// 2️⃣ Fetch page data
+// ------------------------------
+const { slug } = Astro.params;
+
+const data = await sanityClient.fetch<{
+  project: {
+    _id: string;
+    title: string;
+    type: string;
+    slug?: { current: string };
+    archiveRole: string;
+    parentWork: {
+slug: any;
+      title: string;
+    }
+    releaseDate: string;
+    lengthDisplay: string;
+    durationMinutes?: number;
+    durationSeconds?: number;
+    cover: any;
+    links?: {
+      streaming?: { label: string; url: string }[];
+      download?: string;
+    };
+    tracklists: {
+      title: string;
+      tracks: {
+        title: string;
+        duration: string;
+        order: number;
+        artists: { name: string }[];
+      }[];
+    }[];
+  };
+  additional: {
+    title: string;
+    slug: { current: string };
+    releaseDate: string;
+  }[];
+} | null>(`
+{
+  "project": *[
+    _type == "work" &&
+    slug.current == $slug &&
+    type != "Collection"
+  ][0]{
+    _id,
+    type,
+    title,
+    slug,
+    archiveRole,
+    parentWork->{
+      title,
+      slug
+    },
+    releaseDate,
+    lengthDisplay,
+    durationMinutes,
+    durationSeconds,
+    cover,
+    links{
+      streaming[]{ label, url },
+      download
+    },
+    tracklists[]{
+      title,
+      tracks[]->{
+        title,
+        duration,
+        artists[]->{ name }
+      }
+    }
+  },
+
+  "additional": *[
+    _type == "work" &&
+    archiveRole == "additional" &&
+    parentWork->slug.current == $slug
+  ] | order(releaseDate asc){
+    title,
+    slug,
+    releaseDate
+  }
+}
+`, { slug });
+
+
+if (!data?.project) {
+  throw new Error(`Project not found for slug: ${slug}`);
+}
+
+const { project, additional } = data;
+
+// ------------------------------
+// 3️⃣ Helpers
+// ------------------------------
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "long" });
+  const year = date.getFullYear();
+
+  let ordinal = "th";
+  if (day % 10 === 1 && day !== 11) ordinal = "st";
+  else if (day % 10 === 2 && day !== 12) ordinal = "nd";
+  else if (day % 10 === 3 && day !== 13) ordinal = "rd";
+
+  return `${month} ${day}${ordinal}, ${year}`;
+}
+
+// FIX: parse display-only string safely for schema
+function toISODuration(input?: string) {
+  if (!input) return undefined;
+
+  const minutes = input.match(/(\d+)\s*min/);
+  const seconds = input.match(/(\d+)\s*sec/);
+
+  if (!minutes && !seconds) return undefined;
+
+  return `PT${minutes ? minutes[1] + "M" : ""}${seconds ? seconds[1] + "S" : ""}`;
+}
+
+// Define JSON-LD Content
+const musicSchema = {
+  "@context": "https://schema.org",
+  "@type": "MusicAlbum",
+  "name": project.title,
+  "url": `https://tstfie.ch/music/${project.slug?.current ?? ""}`,
+  "datePublished": project.releaseDate,
+  "byArtist": { "@type": "Person", "name": "Niklay Wiborny" },
+  "numTracks": project.tracklists?.[0]?.tracks?.length ?? 0,
+  "duration": `PT${project.durationMinutes ?? 0}M${project.durationSeconds ?? 0}S`,
+  "track": project.tracklists?.[0]?.tracks?.map((track, trackIndex) => ({
+    "@type": "MusicRecording",
+    "position": trackIndex + 1,
+    "name": track.title,
+    "byArtist": track.artists?.map(a => ({ "@type": "Person", "name": a.name })) ?? []
+  })),
+  "sameAs": project.links?.streaming?.map(s => s.url) ?? []
+};
+---
+
+<html lang="en">
+<Head
+  title={`${project.title}`}
+  description={`${project.type} by Niklay — ${formatDate(project.releaseDate)}`}
+  canonical={`https://tstfie.ch/music/${project.slug?.current}`}
+/>
+
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(musicSchema)}
+>
+</script>
+
+<body>
+  <container class="padding">
+    <Header>
+      <a href="./" class="navigation">Back</a>
+    </Header>
+
+    <section class="window music">
+      <main>
+        <div class="music-hero">
+          <img src={urlForImage(project.cover).width(1200).url()} loading="lazy" alt="" class="project-cover"/>
+          <div>
+            <h1>{project.title}</h1>
+            <p class="meta">
+              {formatDate(project.releaseDate)} — {project.lengthDisplay}
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <section>
+        <div class="interaction-wrapper h4 stream-group">
+          {project.links?.streaming && (
+            <>
+              <a class="cta primary dropdown stream-trigger">Stream</a>
+
+              {project.links.streaming.map((service, index) => (
+                <a
+                  href={service.url}
+                  class={`cta primary dropdown option ${String.fromCharCode(97 + index)}`}
+                  data-stream-option
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {service.label}
+                </a>
+              ))}
+            </>
+          )}
+
+          {project.links?.download && (
+            <a href={project.links.download} class="cta download">Download</a>
+          )}
+        </div>
+        {project.tracklists.map((list, discIndex) => {
+          const discTitle = list.title || `Disc ${discIndex + 1}`
+          const hasMultipleDiscs = project.tracklists.length > 1
+
+          return (
+            <div class="tracklist">
+              {hasMultipleDiscs && <h3>{discTitle}</h3>}
+
+              {list.tracks.map((track, trackIndex) => {
+                const trackNumber = (trackIndex + 1).toString().padStart(2, "0")
+
+                return (
+                  <div class="track">
+                    <div class="meta number" style="margin-left:4px">
+                      {trackNumber}
+                    </div>
+                    <div class="track-title">
+                      <div class="title">{track.title}</div>
+                      <div class="meta small">
+                        {track.artists.map(a => a.name).join(", ")}
+                      </div>
+                    </div>
+                    <div class="meta number" style="margin-right:12px">
+                      {track.duration}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+      </section>
+
+      <section class="section">
+        <div class="project-meta-wrapper" style="align-items:center">
+          <div style="margin:0">
+            <div class="meta">{formatDate(project.releaseDate)}</div>
+            <div class="meta">{project.durationMinutes} minutes, {project.durationSeconds} seconds</div>
+            {project.archiveRole === "additional" && project.parentWork && (
+            <div class ="meta">Related to {project.parentWork.title}</div>
+            )}
+            <div class="meta">@{new Date(project.releaseDate).getFullYear()} Niklay Wiborny, for tstfie</div>
+          </div>
+          {(
+            (additional.length > 0 && project.archiveRole !== "additional") ||
+            (project.archiveRole === "additional" && project.parentWork)
+          ) && (
+            <div class="interaction-wrapper h5 additional">
+              {project.archiveRole === "additional" ? (
+                <a class="cta" href={`/music/${project.parentWork.slug.current}`}>
+                  Additional release
+                </a>
+              ) : (
+                <a
+                  class="cta"
+                  href={`/music/${additional[0].slug.current}`}
+                >
+                  {additional.length} additional release{additional.length > 1 ? "s" : ""}
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+    </section>
+    <Footer />
+  </container>
+<script is:inline>
+const streamGroups = document.querySelectorAll('.stream-group');
+
+streamGroups.forEach(group => {
+  const trigger = group.querySelector('.stream-trigger');
+  const options = group.querySelectorAll('[data-stream-option]');
+  const download = group.querySelector('.cta.download');
+
+  if (!trigger || options.length === 0) return;
+
+  let closeTimeout = null;
+  let isOpen = false;
+
+  const openMenu = () => {
+    clearTimeout(closeTimeout);
+
+    options.forEach(option => {
+      option.style.display = 'inline-flex';
+    });
+
+    if (download) {
+      download.style.display = 'none';
+    }
+
+    isOpen = true;
+  };
+
+  const closeMenu = (delay = 150) => {
+    clearTimeout(closeTimeout);
+    closeTimeout = setTimeout(() => {
+      options.forEach(option => {
+        option.style.display = 'none';
+      });
+
+      if (download) {
+        download.style.display = '';
+      }
+
+      isOpen = false;
+    }, delay);
+  };
+
+  /* Desktop hover */
+  trigger.addEventListener('mouseenter', openMenu);
+  group.addEventListener('mouseleave', () => closeMenu(400));
+
+  /* Mobile / touch */
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    isOpen ? closeMenu(0) : openMenu();
+  });
+
+  /* Close when selecting a stream option */
+  options.forEach(option => {
+    option.addEventListener('click', () => closeMenu(0));
+  });
+});
+</script>
+</body>
+</html>

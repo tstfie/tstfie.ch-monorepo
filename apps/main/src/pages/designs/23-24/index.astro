@@ -1,0 +1,72 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/utilities.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import Header from '../../../layouts/header.astro';
+import Head from '../../../layouts/head.astro';
+import Footer from '../../../layouts/footer.astro';
+
+import { sanityClient } from "../../../lib/sanity";
+import { any } from 'astro:schema';
+
+
+const collections = await sanityClient.fetch(`
+  *[_type == "work" && type == "Collection" && releaseDate >= "2023-06-01" && releaseDate <= "2024-05-31"]
+  | order(releaseDate asc) {
+    title,
+    releaseDate,
+    slug,
+    length
+  }
+`);
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "long" });
+  const year = date.getFullYear();
+
+  // get ordinal
+  let ordinal = "th";
+  if (day % 10 === 1 && day !== 11) ordinal = "st";
+  else if (day % 10 === 2 && day !== 12) ordinal = "nd";
+  else if (day % 10 === 3 && day !== 13) ordinal = "rd";
+
+return `${month} ${day}${ordinal}, ${year}`;
+}
+---
+<html lang="en">
+<Head
+  title="tstfie | 23-24"
+  description="Collections by Niklay"
+  canonical="https://www.tstfie.ch/designs/23-24"
+/>
+<body>
+  <div class="padding">
+    <Header>
+        <a href="/" class="navigation">Home</a>
+        <a href="/" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+    </Header>
+    <section class="vflex" style="width:100%;">
+      <section class="window">
+        <h1>23-24</h1>
+        <p>Presented as "Achtklassarbeit," the 23-24 cycle arranges twelve collections created as part of a one-year school project. Its publication simultaneously issued the release of SAINT PABLO, its central statement.</p>
+      </section>
+      <main class="vflex centered" style="row-gap:12px; align-self:center; margin-top:40px;">
+        {collections.map((collection: { slug: { current: any; }; title: unknown; releaseDate: string; length: unknown; }) => (
+            <h2><a href={`/designs/23-24/${collection.slug.current}/`}>{collection.title}</a></h2>
+        ))}
+      </main>
+    </section>
+    <Footer/>
+  </div>
+</body>
+</html>

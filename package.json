@@ -1,0 +1,16 @@
+{
+  "name": "tstfiech-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=apps/main run dev",
+    "build": "npm --workspace=apps/main run build",
+    "preview": "npm --workspace=apps/main run preview"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

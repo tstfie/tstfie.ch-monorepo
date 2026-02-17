@@ -1,0 +1,195 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/collections.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/utilities.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import { sanityClient } from "../../../lib/sanity";
+import { urlForImage } from "../../../lib/url-for-image";;
+
+import Header from '../../../layouts/header.astro';
+import Head from '../../../layouts/head.astro';
+import Footer from '../../../layouts/footer.astro'
+import type { Slug } from "sanity";
+
+
+// ------------------------------
+// 1️⃣ Define static paths
+// ------------------------------
+export async function getStaticPaths() {
+  const slugs: { slug: string }[] = await sanityClient.fetch(`
+    *[_type == "work" && type == "Collection" && releaseDate >= "2025-06-01" && releaseDate <= "2026-05-31"]{
+      "slug": slug.current
+    }
+  `);
+
+  return slugs.map(({ slug }) => ({
+    params: { slug },
+  }));
+}
+
+// ------------------------------
+// 2️⃣ Fetch page data
+// ------------------------------
+const { slug } = Astro.params;
+
+const collection = await sanityClient.fetch<{
+  title: string;
+  type: string;
+  slug?: { current: string };
+  lengthDisplay: string;
+  releaseDate: string;
+  tracklists: {
+    title: string;
+    tracks: {
+      title: string;
+      duration?: string;
+      artists?: { name: string }[];
+      designImage: any;
+    }[];
+  }[];
+} | null>(`
+  *[_type == "work" && slug.current == $slug && releaseDate >= "2025-06-01" && releaseDate <= "2026-05-31"][0]{
+    type,
+    title,
+    slug,
+    lengthDisplay,
+    releaseDate,
+    tracklists[]{
+      title,
+      tracks[]->{
+        title,
+        artists[]->{
+          name
+        },
+        designImage
+      }
+    }
+  }
+`, { slug });
+
+if (!collection) {
+  throw new Error(`Collection not found for slug: ${slug}`);
+  
+}
+// ------------------------------
+// 3️⃣ Optional: format release date
+// ------------------------------
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "long" });
+  const year = date.getFullYear();
+
+  let ordinal = "th";
+  if (day % 10 === 1 && day !== 11) ordinal = "st";
+  else if (day % 10 === 2 && day !== 12) ordinal = "nd";
+  else if (day % 10 === 3 && day !== 13) ordinal = "rd";
+
+  return `${month} ${day}${ordinal}, ${year}`;
+}
+
+const pageTitle = collection.title
+
+const img = (image: any, w: number, q = 80) =>
+  urlForImage(image).width(w).format('webp').quality(q).url();
+
+// Define JSON-LD Content
+const designSchema = {
+  "@context": "https://schema.org",
+  "@type": "Collection",
+  "name": collection.title ?? "",
+  "url": `https://www.tstfie.ch/designs/25-26/${collection.slug?.current ?? ""}`,
+  "datePublished": collection.releaseDate ?? "",
+  "creator": { "@type": "Person", "name": "Niklay Wiborny" },
+  "numberOfItems": collection.tracklists?.reduce(
+    (acc, list) => acc + (list.tracks?.length ?? 0),
+    0
+  ) ?? 0,
+  "hasPart": collection.tracklists?.flatMap(list =>
+    list.tracks?.map((track, trackIndex) => ({
+      "@type": "VisualArtwork",
+      "name": track.title ?? "",
+      "position": trackIndex + 1,
+      "image": track.designImage ? urlForImage(track.designImage).width(1200).url() : ""
+    })) ?? []
+  ) ?? []
+};
+---
+<html lang="en">
+<Head
+  title={`${pageTitle}`}
+  description={`Collection by Niklay`}
+  canonical={`https://www.tstfie.ch/designs/25-26/${collection.slug?.current ?? ""}`}
+/>
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(designSchema)}
+>
+</script>
+<body>
+  <container class="padding">
+    <Header>
+        <a href="/" class="navigation">Home</a>
+        <a href="#top" class="navigation">Top</a>
+    </Header>
+    <article class="collection">
+      <header class="collection-header">
+        <div class="project-header">
+          <p class="meta">25-26</p>
+          <h1>{collection.title}</h1>
+        </div>
+        <section>
+          <div class="meta">{formatDate(collection.releaseDate)}</div>
+        </section>
+      </header>
+      <div class="hflex">
+        <main class="collection-scroll">
+          {collection.tracklists?.map((list) => (
+            <>
+              {list.tracks.map((track, trackIndex) => (
+                <section class="design-wrapper" key={trackIndex}>
+                  <div class="title">{track.title}</div>
+                  <img
+                    src={img(track.designImage, 939)}
+                    class="sneaker-design"
+                    srcset={`
+                      ${img(track.designImage, 480, 70)} 480w,
+                      ${img(track.designImage, 768, 75)} 768w,
+                      ${img(track.designImage, 939, 80)} 939w,
+                      ${img(track.designImage, 1200, 80)} 1200w
+                    `}
+                    fetchpriority="high"
+                    width="939"
+                    height="1302"
+                    alt="Sneaker design"
+                  />
+                </section>
+              ))}
+            </>
+          ))}
+        </main>
+
+        <div class="collection-tracklist">
+          {collection.tracklists?.map((list) =>
+            list.tracks.map((track, trackIndex) => <h3 style="line-height:120%" key={trackIndex}>{track.title}<br/></h3>)
+          )}
+        </div>
+      </div>
+      <section class="section">
+        <div class="meta">{formatDate(collection.releaseDate)}</div>
+        <div class="meta">{collection.type} by Niklay, {collection.lengthDisplay}</div>
+          <div class="meta">@{new Date(collection.releaseDate).getFullYear()} Niklay Wiborny, for tstfie</div>
+      </section>
+    </article>
+    <Footer/>
+  </container>
+</body>
+</html>

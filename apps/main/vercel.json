@@ -1,0 +1,44 @@
+{
+  "redirects": [
+    {
+      "source": "/spirits",
+      "destination": "/music/spirits",
+      "permanent": true
+    },
+    {
+      "source": "/homes",
+      "destination": "/music/homes",
+      "permanent": true
+    },
+    {
+      "source": "/periapsis",
+      "destination": "/music/periapsis",
+      "permanent": true
+    },
+    {
+      "source": "/spirits-legacy",
+      "destination": "/music/spirits-legacy",
+      "permanent": true
+    },
+    {
+      "source": "/saintification",
+      "destination": "/music/saintification",
+      "permanent": true
+    },
+    {
+      "source": "/circle-of-fifths",
+      "destination": "/music/circle-of-fifths",
+      "permanent": true
+    },
+    {
+      "source": "/twiy-waves",
+      "destination": "/music/twiy-waves",
+      "permanent": true
+    },
+    {
+      "source": "/latest",
+      "destination": "/music/homes",
+      "permanent": true
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+---
+export const prerender = true;
+
+import "@styles/base.css"
+import "@styles/core.css"
+import "@styles/structural.css"
+import "@styles/audit.css"
+import "@styles/typography.css"
+import "@styles/components.css"
+import "@styles/responsive.css"
+import "@styles/normalise.css"
+
+import { sanityClient } from "../../lib/sanity";
+import { urlForImage } from "../../lib/url-for-image";;
+
+import Header from '../../layouts/header.astro';
+import Head from '../../layouts/head.astro';
+import Footer from '../../layouts/footer.astro'
+
+import type { Image } from "sanity";
+
+// ------------------------------
+// Fetch page data
+// ------------------------------
+
+const projects = await sanityClient.fetch<{
+  title: string;
+  type: string;
+  slug?: { current: string };
+  releaseDate: string;
+  cover: Image;
+}[]>(`
+  *[_type == "work" && type != "Collection" && archiveRole == "primary"] | order(releaseDate desc) {
+    title,
+    slug,
+    cover,
+    releaseDate
+  }
+`);
+
+// ------------------------------
+// Optional: format release date
+// ------------------------------
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "long" });
+  const year = date.getFullYear();
+
+  let ordinal = "th";
+  if (day % 10 === 1 && day !== 11) ordinal = "st";
+  else if (day % 10 === 2 && day !== 12) ordinal = "nd";
+  else if (day % 10 === 3 && day !== 13) ordinal = "rd";
+
+  return `${month} ${day}${ordinal}, ${year}`;
+}
+---
+<html lang = en>
+<Head
+  title="tstfie | Music"
+  description="Music by Niklay"
+  canonical="https://tstfie.ch/music/"
+/>
+<body>
+  <container class="padding">
+    <Header>
+		<a href="/" class="navigation">Home</a>
+		<a href="/" onclick="event.preventDefault(); history.back();" class="navigation">Back</a>
+	  </Header>
+    <section class="window">
+    <div class="audit-log">
+      {projects.map((project) => (
+          <a href={`/music/${project.slug?.current}`}><section class="audit-log-entry" style="row-gap:8px;">
+          <header>
+            <h2>{project.title}</h2>
+            <p class="meta">{formatDate(project.releaseDate)}</p>
+          </header>
+            <img src={urlForImage(project.cover).width(1200).url()} class="project-cover audit" style="margin-bottom:20px" loading="lazy" alt=""/>
+          </section></a>
+      ))}
+	  </div>
+    </section>
+    <Footer/>
+  </container>
+</body>
+</html>

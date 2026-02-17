@@ -1,0 +1,68 @@
+---
+const {
+    title = "tstfie",
+    description = "Niklay Wiborny, for tstfie.",
+    canonical = "https://www.tstfie.ch"
+} = Astro.props;
+---
+<head>
+	<meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+
+    {/* -------- Meta Tags -------- */}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    {/*-------- Canonical & Language --------*/}
+    <link rel="canonical" href={canonical} />
+    <meta name="language" content="en-GB"/>
+
+    {/*---------- Social Previews ----------*/}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="tstfie.ch" />
+    <meta property="og:title" content={title} />
+    {/*---- Description ----*/}
+    <meta property="og:description" content={description} />
+    {/*------ URL ------*/}
+    <meta property="og:url" content="https://www.tstfie.ch" />
+
+    {/* -------- Favicon & App Icon -------- */}
+    <link rel="icon" href="/favicon.webp" type="image" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-ipad-76x76.webp">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-iphone-retina-120x120.webp">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-ipad-retina-152x152.webp">
+    <link rel="manifest" href="/manifest.webmanifest" />
+    {/*-------- UI Colours & Fonts -------- */}
+    <meta name="theme-color" content="#ededed" />
+    <meta name="color-scheme" content="light" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+
+
+    {/*-------- schema.org -------- */}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "tstfie",
+        "url": "https://tstfie.ch",
+        "author": {
+        "@type": "Person",
+        "name": "Niklay",
+        "lastName": "Wiborny"
+        },
+        "description": "Niklay Wiborny, for tstfie.",
+        "sameAs": [
+        "https://www.instagram.com/tstfie",
+        "https://soundcloud.com/tstfie"
+        ]
+    }
+    </script>
+
+	<meta name="viewport" content="width=device-width" />
+	<meta name="generator" content={Astro.generator} />
+    <meta name="google-site-verification" content="Sa3HtOI1RO3r6kjmhgqXHFlbbgcS79UKPUYcyrROPS0" />
+</head>

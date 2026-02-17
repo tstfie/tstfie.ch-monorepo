@@ -1,0 +1,195 @@
+---
+export const prerender = true;
+
+import '@styles/base.css'
+import '@styles/core.css'
+import '@styles/structural.css'
+import '@styles/typography.css'
+import '@styles/audit.css'
+import '@styles/components.css'
+import '@styles/utilities.css'
+import "@styles/responsive.css"
+import '@styles/normalise.css'
+
+import type { SanityDocument } from "@sanity/client";
+import PortableText from "../components/PortableText.astro";
+import { sanityClient } from "../lib/sanity";
+import { urlForImage } from "../lib/url-for-image";;
+
+import Header from '../layouts/header.astro';
+import Head from '../layouts/head.astro';
+import Footer from '../layouts/footer.astro';
+
+import type { Image, UrlComponents } from "sanity";
+
+// ------------------------------
+// Fetch page data
+// ------------------------------
+
+const entry = await sanityClient.fetch<{
+  releaseDate: string;
+  title: string;
+  heading: string;
+  paragraph?: string;
+  image?: Image;
+  link?: string;
+  linkTitle?: string;
+}[]>(`
+  *[_type == "audit"] | order(
+    coalesce(work->releaseDate, releaseDate) desc
+  ) {
+    // Release date
+    "releaseDate": coalesce(
+      releaseDate,
+      work->releaseDate
+    ),
+
+    // Preview title
+    "title": coalesce(
+      title,
+      work->title
+    ),
+
+    // Opened-state heading
+    "heading": coalesce(
+      heading,
+      work->type
+    ),
+
+    // Manual-only description
+    paragraph,
+
+    // Cover image
+    "image": coalesce(
+      image,
+      work->cover
+    ),
+
+    // Correct production URL
+    "link": coalesce(
+      select(
+        // MUSIC (anything that != collection)
+        work->type != "Collection" =>
+          "/music/" + work->slug.current,
+
+        // COLLECTIONS — routed by release window
+        work->type == "Collection" &&
+        work->releaseDate >= "2023-06-01" &&
+        work->releaseDate <= "2024-05-31" =>
+          "/designs/23-24/" + work->slug.current,
+
+        work->type == "Collection" &&
+        work->releaseDate >= "2024-06-01" &&
+        work->releaseDate <= "2025-05-31" =>
+          "/designs/24-25/" + work->slug.current,
+
+        work->type == "Collection" &&
+        work->releaseDate >= "2025-06-01" &&
+        work->releaseDate <= "2026-05-31" =>
+          "/designs/25-26/" + work->slug.current
+      ),
+      link
+    ),
+
+    "linkTitle": coalesce(
+      linkTitle,
+      select(
+        work->type == "Collection" => "View collection",
+        work->type in ["Mixtape", "EP", "Single"] => "View project",
+        true => null,
+      ),
+      )
+  }
+`);
+
+// ------------------------------
+// format release date
+// ------------------------------
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // months are 0-indexed
+  const year = String(date.getFullYear()).slice(-2); // last 2 digits
+
+  return `${day}/${month}/${year}`;
+}
+---
+
+<html lang ="en">
+<Head
+  title="tstfie"
+  description="Niklay Wiborny, for tstfie."
+  canonical="https://www.tstfie.ch/"
+/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Niklay Wiborny",
+  "url": "https://tstfie.ch",
+  "sameAs": [],
+  "description": "Niklay Wiborny, for tstfie: multidisciplinary sonic and visual artist."
+}
+</script>
+<body>
+  <container class="padding">
+	{/*// Header //*/}
+    <Header>
+      <a href="/about" class="navigation">Info</a>
+      <div class="projects-nav">
+        <a href="#projects" class="navigation view-projects">View projects</a>
+        <div class="projects-links">
+          <a href="/designs" class="navigation">Designs</a>
+          <a href="/music" class="navigation">Music</a>
+        </div>
+      </div>
+    </Header>
+	{/*// Main content //*/}
+    <section class="window">
+      <main class="audit-log" id="projects">
+        {entry.map((entry) => (
+          <article class="audit-log-entry" data-open="false">
+            <header class="log-entry-preview">
+              <p class="meta number">{formatDate(entry.releaseDate)}</p>
+              <h3><span class="link">{entry.title}</span></h3>
+            </header>
+            <section class="log-entry-content">
+                <p>{entry.heading && (<span class="h4" style="margin-top:4px;">{entry.heading}</span><br/>)}{entry.paragraph && (<>{entry.paragraph}</>)}</p>
+              {entry.image && (<img src={urlForImage(entry.image).width(1200).url()} class="project-cover audit" loading="lazy"/>)}
+              {entry.linkTitle && (<a href={entry.link} class="cta" style="margin-top:-4px;"><h5>{entry.linkTitle}</h5></a>)}
+            </section>
+          </article>
+        ))}
+      </main>
+    </section>
+	{/*// Footer component //*/}
+	<Footer/>
+  </container>
+  {/*// Audit Log Animation //*/}
+<script is:inline async="false">
+  document.addEventListener('DOMContentLoaded', () => {
+    const entries = document.querySelectorAll('.audit-log-entry');
+
+    entries.forEach(entry => {
+      entry.addEventListener('click', (e) => {
+        /*/ If entry is already open, do nothing /*/
+        if (entry.dataset.open === 'true') return;
+
+        /*/ Close all other entries /*/
+        entries.forEach(e => e.dataset.open = 'false');
+
+        /*/ Open this one /*/
+        entry.dataset.open = 'true';
+      });
+    });
+
+    /*/ Clicking outside closes all entries /*/
+    document.addEventListener('click', (e) => {
+      if (![...entries].some(entry => entry.contains(e.target))) {
+        entries.forEach(entry => entry.dataset.open = 'false');
+      }
+    });
+  });
+</script>
+</body>
+</html>

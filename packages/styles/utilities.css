@@ -1,0 +1,27 @@
+.hflex {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  user-select: none;
+}
+
+.vflex {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.centered {
+  justify-content: stretch;
+  align-items: center;
+}
+
+.link {
+  color: #262626;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  text-decoration-color: #2626264d;
+}
