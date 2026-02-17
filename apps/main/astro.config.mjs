@@ -6,7 +6,7 @@ import sanity from '@sanity/astro';
 import react from '@astrojs/react';
 import playformCompress from '@playform/compress'
 import path from 'path';
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
