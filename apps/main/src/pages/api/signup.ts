@@ -95,46 +95,46 @@ export const POST: APIRoute = async ({ request }) => {
       ...new Set(interests.flatMap(i => LIST_MAP[i])),
     ];
 
-    /* ================================
-       Brevo request
-    ================================= */
+/* ================================
+   Brevo request
+================================= */
+const BREVO_API_KEY = process.env.BREVO_API_KEY; // runtime variable
 
-    // Ensure API key is available (fail fast with a clear error)
-    if (!import.meta.env.BREVO_API_KEY) {
-      console.error("BREVO_API_KEY is not set (signup)");
-      return jsonError("brevo_key_missing", 500);
-    }
+if (!BREVO_API_KEY) {
+  console.error("BREVO_API_KEY is not set (signup)");
+  return jsonError("brevo_key_missing", 500);
+}
 
-    const brevoRes = await fetch(
-      "https://api.brevo.com/v3/contacts/doubleOptinConfirmation",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": import.meta.env.BREVO_API_KEY,
-        },
-        body: JSON.stringify({
-          email,
-          attributes: {
-            FIRSTNAME: firstName || undefined,
-            LASTNAME: lastName || undefined,
-            MESSAGE: message || undefined,
-            DOI_STATUS: "PENDING",
-          },
-          includeListIds: listIds,
-          templateId: 1,
-          redirectionUrl: "https://tstfie.ch/signup/success",
-        }),
-      }
-    );
+const brevoRes = await fetch(
+  "https://api.brevo.com/v3/contacts/doubleOptinConfirmation",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": BREVO_API_KEY, // use process.env here
+    },
+    body: JSON.stringify({
+      email,
+      attributes: {
+        FIRSTNAME: firstName || undefined,
+        LASTNAME: lastName || undefined,
+        MESSAGE: message || undefined,
+        DOI_STATUS: "PENDING",
+      },
+      includeListIds: listIds,
+      templateId: 1,
+      redirectionUrl: "https://tstfie.ch/signup/success",
+    }),
+  }
+);
 
-    if (!brevoRes.ok) {
-      const text = await brevoRes.text();
-      console.error("Brevo status:", brevoRes.status);
-      console.error("Brevo body:", text);
+if (!brevoRes.ok) {
+  const text = await brevoRes.text();
+  console.error("Brevo status:", brevoRes.status);
+  console.error("Brevo body:", text);
 
-      return jsonError("brevo_failed", 500);
-    }
+  return jsonError("brevo_failed", 500);
+}
 
     /* ================================
        Success
