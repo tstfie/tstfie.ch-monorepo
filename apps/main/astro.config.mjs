@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { defineConfig } from 'astro/config';
 
+import 'dotenv/config';
 import sanity from '@sanity/astro';
 import react from '@astrojs/react';
 import playformCompress from '@playform/compress'
@@ -26,5 +27,5 @@ export default defineConfig({
   ), react(), playformCompress()],
 
   output: 'server',
-  adapter: vercel({}),
+  adapter: vercel(),
 });
