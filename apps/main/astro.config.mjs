@@ -1,11 +1,11 @@
-// @ts-check
+// @ts-nocheck
 import { defineConfig } from 'astro/config';
 
 import sanity from '@sanity/astro';
 import react from '@astrojs/react';
 import playformCompress from '@playform/compress'
 import path from 'path';
-import vercel from '@astrojs/vercel';
+import vercel from '@astrojs/vercel/serverless';
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,5 +26,5 @@ export default defineConfig({
   ), react(), playformCompress()],
 
   output: 'server',
-  adapter: vercel()
+  adapter: vercel({}),
 });

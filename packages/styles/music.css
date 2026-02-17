@@ -28,7 +28,7 @@
 .project-cover {
   width: 100%;
   max-width: 420px;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.08);
 }
 
@@ -123,5 +123,6 @@
   .project-cover {
     width: 100%;
     max-width: 320px;
+    border-radius: 4px;
   }
 }

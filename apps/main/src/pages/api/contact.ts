@@ -7,7 +7,7 @@ import type { APIRoute } from 'astro';
 const BREVO_API_KEY = import.meta.env.BREVO_API_KEY;
 const TO_EMAIL = 'info@tstfie.ch';
 const FROM_EMAIL = 'no-reply@tstfie.ch';
-const ALLOWED_ORIGIN = 'https://www.tstfie.ch';
+const ALLOWED_ORIGIN = 'https://tstfie.ch';
 
 const LIMITS = {
   name: 80,
