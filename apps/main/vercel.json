@@ -1,4 +1,6 @@
 {
+  "framework": "astro",
+  "outputDirectory": ".vercel/output",
   "redirects": [
     {
       "source": "/spirits",
